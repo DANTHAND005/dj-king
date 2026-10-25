@@ -10,12 +10,12 @@ void main() {
     await tester.pumpWidget(DjKingApp(signIn: () => signIn.future));
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Test song playback'), findsNothing);
+    expect(find.text('Choose a song'), findsNothing);
 
     signIn.complete('player-one');
     await tester.pumpAndSettle();
     expect(find.text('player-one'), findsOneWidget);
-    expect(find.text('Test song playback'), findsOneWidget);
+    expect(find.text('Choose a song'), findsOneWidget);
   });
 
   testWidgets('failed sign-in can be retried', (tester) async {

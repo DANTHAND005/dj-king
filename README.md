@@ -4,7 +4,7 @@ A Flutter/Dart class project: join a host's lobby, randomly choose two contestan
 
 ## Current stage: 1 (connection and playback check)
 
-The app signs in anonymously, displays the player's ID, and opens a YouTube playback test. Player and Room models are defined; lobby and game features are not implemented yet. The real-phone checkpoint is pending. Each later stage requires approval after the preceding stage's real-phone test.
+The app signs in anonymously, displays the player's ID, and opens a square YouTube song picker with a separate playback test. Player, Room, and Song models are defined; lobby and game features are not implemented yet. Picking a song does not start playback. The shared round timer and host playback come with later game stages. The real-phone checkpoint is pending.
 
 ## File organization
 
@@ -16,16 +16,22 @@ lib/
   models/
     player.dart                 Player ID and nickname
     room.dart                   Room identity, phase, and round number
+    song.dart                   Video ID and YouTube search metadata
   services/
     game_service.dart           Firebase initialization and anonymous sign-in
+    youtube_search_service.dart Official YouTube search requests and errors
   screens/
     connection_screen.dart      Loading, connection errors, player ID, retry
-    playback_screen.dart        YouTube loading, stop control, playback errors
+    playback_screen.dart        Song selection, play/stop test, playback errors
+  widgets/
+    song_picker.dart            Bordered square with search and selection
   utils/
     youtube_link.dart           Validates supported links and extracts video IDs
 test/
   widget_test.dart               Connection loading, success, and retry
   utils/youtube_link_test.dart   Link validation and malformed input checks
+  services/                     YouTube request and response checks
+  widgets/                      Song-picker interaction and phone-width checks
 ```
 
 No state-management framework or model generator is used. Firebase client identifiers in `firebase_options.dart` are public configuration, not admin credentials. Anonymous sign-in does not grant access to the locked database.
@@ -40,6 +46,21 @@ flutter analyze
 flutter test
 flutter run -d chrome
 ```
+
+### Enable YouTube song search
+
+Live search needs YouTube Data API v3 enabled in `dj-king-c5353` and a dedicated API key restricted to that API. Do not reuse an admin credential. A web client key is visible in the built application, so also restrict it to the actual web origins in Google Cloud.
+
+Copy `config/youtube.example.json` to the ignored `config/youtube.local.json` and fill in the restricted key. For the existing local preview origin, use:
+
+```powershell
+flutter build web --dart-define-from-file=config/youtube.local.json
+python -m http.server 52943 --bind 127.0.0.1 --directory build/web
+```
+
+For native testing, configure a suitable separate restricted client key for that platform and pass its configuration with `--dart-define-from-file`. Do not remove the web key's origin restrictions to make native testing work.
+
+Search happens only on submission, returns up to eight embeddable video results, and has no automatic pagination. The list scrolls inside the square. Search results do not guarantee playback in every region or on every device. Missing configuration, network errors, empty results, and quota limits are shown explicitly.
 
 ### Real Android phone test
 

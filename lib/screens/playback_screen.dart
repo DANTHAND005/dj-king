@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
-import '../utils/youtube_link.dart';
+import '../models/song.dart';
+import '../services/youtube_search_service.dart';
+import '../widgets/song_picker.dart';
 
 class PlaybackScreen extends StatefulWidget {
   const PlaybackScreen({super.key});
@@ -13,8 +15,8 @@ class PlaybackScreen extends StatefulWidget {
 }
 
 class _PlaybackScreenState extends State<PlaybackScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _link = TextEditingController();
+  final _search = YoutubeSearchService();
+  Song? _selectedSong;
   late final _player = YoutubePlayerController(
     params: const YoutubePlayerParams(
       showControls: true,
@@ -23,7 +25,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
   );
   bool _busy = false;
   bool _hasSong = false;
-  String _message = 'Paste a YouTube link to test a song.';
+  String _message = 'Pick a song above. Selecting it will not start playback.';
 
   Future<void> _control(Future<void> Function() action, String message) async {
     setState(() => _busy = true);
@@ -41,19 +43,19 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     }
   }
 
-  void _loadSong() {
-    if (!_formKey.currentState!.validate()) return;
-    final videoId = youtubeVideoId(_link.text)!;
+  void _playSelectedSong() {
+    final song = _selectedSong;
+    if (song == null) return;
     setState(() => _hasSong = true);
     _control(
-      () => _player.cueVideoById(videoId: videoId),
-      'Song loaded. Tap play in the video.',
+      () => _player.loadVideoById(videoId: song.videoId),
+      'Playing ${song.title}. If playback is blocked, tap play in the video.',
     );
   }
 
   @override
   void dispose() {
-    _link.dispose();
+    _search.close();
     _player.close();
     super.dispose();
   }
@@ -61,7 +63,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Song playback test')),
+      appBar: AppBar(title: const Text('Choose your song')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -72,26 +74,24 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Load a song, play it, stop it, then load a second song. Audio plays on this device.',
+                    'Search YouTube inside the box and pick your song.',
                   ),
                   const SizedBox(height: 16),
-                  Form(
-                    key: _formKey,
-                    child: TextFormField(
-                      controller: _link,
-                      keyboardType: TextInputType.url,
-                      autocorrect: false,
-                      decoration: const InputDecoration(
-                        labelText: 'YouTube link',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) => youtubeVideoId(value ?? '') == null
-                          ? 'Paste a valid HTTPS YouTube video link.'
-                          : null,
-                      onFieldSubmitted: (_) {
-                        if (!_busy) _loadSong();
-                      },
+                  SongPicker(
+                    search: _search.search,
+                    selectedId: _selectedSong?.videoId,
+                    onSelected: (song) => setState(() => _selectedSong = song),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_selectedSong case final song?) ...[
+                    Semantics(
+                      liveRegion: true,
+                      child: Text('Selected: ${song.title}\n${song.channel}'),
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                  const Text(
+                    'Playback test: play your selection here. The shared round timer will be added with the game phases.',
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -99,8 +99,12 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                     runSpacing: 8,
                     children: [
                       FilledButton(
-                        onPressed: _busy ? null : _loadSong,
-                        child: Text(_busy ? 'Please wait...' : 'Load song'),
+                        onPressed: _busy || _selectedSong == null
+                            ? null
+                            : _playSelectedSong,
+                        child: Text(
+                          _busy ? 'Please wait...' : 'Play selected song',
+                        ),
                       ),
                       OutlinedButton(
                         onPressed: !_hasSong || _busy

@@ -89,7 +89,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             builder: (_) => const PlaybackScreen(),
                           ),
                         ),
-                        child: const Text('Test song playback'),
+                        child: const Text('Choose a song'),
                       ),
                     ],
                   );
