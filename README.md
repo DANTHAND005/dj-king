@@ -44,12 +44,14 @@ Created with Flutter 3.47.7 and Dart 3.13.5. Commit `pubspec.lock` and use the s
 flutter pub get
 flutter analyze
 flutter test
-flutter run -d chrome
+flutter run -d chrome --web-hostname 127.0.0.1 --web-port 52943 --dart-define-from-file=config/youtube.local.json
 ```
 
 ### Enable YouTube song search
 
 Live search needs YouTube Data API v3 enabled in `dj-king-c5353` and a dedicated API key restricted to that API. Do not reuse an admin credential. A web client key is visible in the built application, so also restrict it to the actual web origins in Google Cloud.
+
+The API is now enabled. This machine's ignored local configuration uses the dedicated `DJ King local web YouTube search` key, restricted to YouTube Data API v3 and `http://127.0.0.1:52943/*`. A clone needs its own local configuration; the key is not committed.
 
 Copy `config/youtube.example.json` to the ignored `config/youtube.local.json` and fill in the restricted key. For the existing local preview origin, use:
 
@@ -57,6 +59,8 @@ Copy `config/youtube.example.json` to the ignored `config/youtube.local.json` an
 flutter build web --dart-define-from-file=config/youtube.local.json
 python -m http.server 52943 --bind 127.0.0.1 --directory build/web
 ```
+
+Use either the Flutter development server or the static preview server on port 52943, not both at once. Stop the existing server before starting another on that port.
 
 For native testing, configure a suitable separate restricted client key for that platform and pass its configuration with `--dart-define-from-file`. Do not remove the web key's origin restrictions to make native testing work.
 

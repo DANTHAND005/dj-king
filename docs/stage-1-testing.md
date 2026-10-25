@@ -13,6 +13,16 @@ Status: real Android and iPhone tests have not been run.
 - Loading and sign-in retry are covered by widget tests; actual offline recovery is still a phone-check item.
 - Native playback, a complete song, and embedding-restriction recovery have not been verified.
 
+## Song-picker checks performed on October 25, 2026
+
+- All ten automated tests pass, including square layout, selection, loading, malformed responses, quota errors, and immediate search failures.
+- Live YouTube search for `jazz piano` returned eight results inside the square.
+- A result was selected without automatically starting playback; the selected title and channel appeared below the square.
+- Manual playback of the selected result advanced past 20 seconds, and `Stop song` stopped it.
+- The live results, selected title, and playback controls fit a 390px browser viewport without horizontal overflow; no browser errors were recorded.
+- The search key is excluded from Git and restricted to YouTube Data API v3 and the current local preview origin.
+- This is a standalone picker/playback check. Shared submission deadlines and host-controlled round playback are not implemented yet.
+
 ## Automated checks
 
 ```powershell
