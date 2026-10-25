@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'playback_screen.dart';
+import 'song_selection_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
   const ConnectionScreen({super.key, required this.signIn});
@@ -86,7 +86,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       FilledButton(
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => const PlaybackScreen(),
+                            builder: (_) => const SongSelectionScreen(),
                           ),
                         ),
                         child: const Text('Choose a song'),

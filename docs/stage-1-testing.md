@@ -25,11 +25,24 @@ Status: real Android and iPhone tests have not been run.
 
 ## Automated checks
 
+The current local battle preview has 14 passing tests. Countdown tests verify one transition after five seconds and cancellation when leaving; playback-order tests verify left, right, and a stable finished state.
+
 ```powershell
 flutter analyze
 flutter test
 flutter build web
 ```
+
+## Local battle browser checks on October 25, 2026
+
+- Chose different left and right songs from live YouTube search.
+- Verified the visible five-second countdown automatically opened the separate battle screen.
+- Verified the left song played first and the right waited.
+- After seeking near the left song's ending and letting it finish, verified automatic playback of the right song with the left marked `Finished`.
+- Ended the right song and verified the player was removed and both sides were marked finished.
+- Verified the manual early-stop handoff with the same video selected on both sides; the right side did not get skipped.
+- Checked the battle at 390px width with no horizontal overflow.
+- These checks do not verify multiplayer synchronization or native phone behavior.
 
 ## Connection test on two phones
 
@@ -45,12 +58,14 @@ Two tabs in the same browser profile share sign-in storage and normally show the
 1. Open `Choose a song` with the YouTube API configuration supplied at build time.
 2. Submit an empty search. A validation message should appear without a request.
 3. Search for a song or artist. Results should scroll inside the square, with titles, channels, thumbnails, and `Pick this song` buttons.
-4. Pick a song. Its title should appear below the square without starting playback. Press `Play selected song` for this standalone test; tap YouTube's play control if the browser blocks autoplay.
-5. Verify audible playback. Press `Stop song`; audio should stop.
-6. Pick a different video and verify playback again.
-7. If a search result becomes unavailable or refuses embedding, the app should show a useful error without crashing.
-8. Go back, then reopen the playback test. There should be no old audio playing.
-9. Rotate the phone and check that the input, player, and buttons remain usable.
+4. Pick the left contestant's song, then pick the right contestant's song. No song should play during selection.
+5. Verify the countdown starts at five and automatically opens `Song battle` once.
+6. The left panel should be active and the right panel should say `Up next`. Tap YouTube's Play control if the browser blocks autoplay.
+7. Let the left song finish, or use `End left song and play right`. Left audio must stop before the right song starts. Left should say `Finished`; right should become active.
+8. Finish or end the right song. The screen should say `Both songs are finished`, with no audio continuing.
+9. If a result is unavailable or refuses embedding, verify `Retry song` and `Skip unavailable song` work without overlapping audio.
+10. Go back during a countdown and wait. It must not open the battle screen after leaving.
+11. Rotate the phone and check that both panels, the player, and buttons remain usable. Both sides use a single shared player below the panels so playback cannot overlap.
 
 A correctly formatted link is not proof that YouTube will allow playback. Regional, age, account, network, and embedding restrictions can still prevent it. The app uses a visible YouTube player and does not extract audio or bypass restrictions.
 

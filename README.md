@@ -4,7 +4,9 @@ A Flutter/Dart class project: join a host's lobby, randomly choose two contestan
 
 ## Current stage: 1 (connection and playback check)
 
-The app signs in anonymously, displays the player's ID, and opens a square YouTube song picker with a separate playback test. Player, Room, and Song models are defined; lobby and game features are not implemented yet. Picking a song does not start playback. The shared round timer and host playback come with later game stages. The real-phone checkpoint is pending.
+The app signs in anonymously and opens a square YouTube song picker. In the local preview, pick the left contestant's song and then the right contestant's song on the same device. A five-second countdown opens a new battle screen with both song panels. One video player plays left first, then right. The next song starts when the current song finishes or is ended manually.
+
+This is a local preview, not a connected multiplayer lobby. Shared submission deadlines, real contestant names, host permissions, and voting still belong to later stages. Native phone testing is pending. Browser autoplay restrictions may require a tap on YouTube's Play control.
 
 ## File organization
 
@@ -17,14 +19,17 @@ lib/
     player.dart                 Player ID and nickname
     room.dart                   Room identity, phase, and round number
     song.dart                   Video ID and YouTube search metadata
+    battle_order.dart           Left-to-right playback order and completion
   services/
     game_service.dart           Firebase initialization and anonymous sign-in
     youtube_search_service.dart Official YouTube search requests and errors
   screens/
     connection_screen.dart      Loading, connection errors, player ID, retry
-    playback_screen.dart        Song selection, play/stop test, playback errors
+    song_selection_screen.dart  Select both songs and start the countdown
+    battle_screen.dart          Two song panels and one sequential video player
   widgets/
     song_picker.dart            Bordered square with search and selection
+    battle_countdown.dart       Five-second local preview countdown
   utils/
     youtube_link.dart           Validates supported links and extracts video IDs
 test/
