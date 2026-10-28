@@ -49,3 +49,6 @@ app.*.map.json
 
 # Local YouTube search configuration; use restricted client keys.
 config/youtube.local.json
+
+node_modules/
+.firebase/

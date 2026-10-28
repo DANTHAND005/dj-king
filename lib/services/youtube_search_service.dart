@@ -16,6 +16,10 @@ class YoutubeSearchService {
     this.apiKey = const String.fromEnvironment('YOUTUBE_API_KEY'),
   }) : _client = client ?? http.Client();
 
+  static const _unreadable = YoutubeSearchException(
+    'YouTube returned an unreadable result. Try again.',
+  );
+
   final http.Client _client;
   final String apiKey;
 
@@ -52,9 +56,21 @@ class YoutubeSearchService {
         );
       }
       final items = body['items'] as List;
-      return items
-          .map((item) => Song.fromSearchResult(item as Map<String, dynamic>))
-          .toList();
+      // Name searches can return channels or odd items; skip those instead of failing the whole search.
+      final songs = <Song>[];
+      for (final item in items) {
+        try {
+          songs.add(Song.fromSearchResult(item as Map<String, dynamic>));
+        } on FormatException {
+          continue;
+        } on Error {
+          continue;
+        }
+      }
+      if (songs.isEmpty && items.isNotEmpty) {
+        throw const FormatException('No readable results.');
+      }
+      return songs;
     } on YoutubeSearchException {
       rethrow;
     } on TimeoutException {
@@ -65,18 +81,11 @@ class YoutubeSearchService {
       throw const YoutubeSearchException(
         'Could not reach YouTube. Check your connection and try again.',
       );
-    } on FormatException {
-      throw const YoutubeSearchException(
-        'YouTube returned an unreadable result. Try again.',
-      );
-    } on TypeError {
-      throw const YoutubeSearchException(
-        'YouTube returned an unreadable result. Try again.',
-      );
-    } on RangeError {
-      throw const YoutubeSearchException(
-        'YouTube search is unavailable. Please try again later.',
-      );
+    } on FormatException catch (_) {
+      throw _unreadable;
+    } on Error catch (_) {
+      // TypeError and RangeError from an unexpected response shape.
+      throw _unreadable;
     }
   }
 

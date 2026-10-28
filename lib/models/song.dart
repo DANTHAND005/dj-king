@@ -13,6 +13,28 @@ class Song {
   final String channel;
   final String thumbnailUrl;
 
+  Map<String, dynamic> toMap() => {
+    'videoId': videoId,
+    'title': title,
+    'channel': channel,
+    'thumbnailUrl': thumbnailUrl,
+  };
+
+  factory Song.fromMap(Map<String, dynamic> data) {
+    final id = data['videoId'] as String;
+    final thumbnail = data['thumbnailUrl'] as String;
+    if (youtubeVideoId('https://youtu.be/$id') != id ||
+        Uri.tryParse(thumbnail)?.scheme != 'https') {
+      throw const FormatException('Invalid song data.');
+    }
+    return Song(
+      videoId: id,
+      title: data['title'] as String,
+      channel: data['channel'] as String,
+      thumbnailUrl: thumbnail,
+    );
+  }
+
   factory Song.fromSearchResult(Map<String, dynamic> result) {
     final identity = result['id'] as Map<String, dynamic>;
     final id = identity['videoId'] as String;

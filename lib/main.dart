@@ -5,5 +5,6 @@ import 'services/game_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(DjKingApp(signIn: GameService().signIn));
+  final game = GameService();
+  runApp(DjKingApp(signIn: game.signIn, game: game));
 }

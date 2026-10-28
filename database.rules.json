@@ -1,6 +1,57 @@
 {
   "rules": {
     ".read": false,
-    ".write": false
+    ".write": false,
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('hostId').val() === auth.uid) || data.child('hostId').val() === auth.uid)",
+        "phase": {
+          ".validate": "newData.isString() && newData.val().matches(/^(lobby|contestants|genre|submission|countdown|songA|songB|voting|result|finished|closed)$/)"
+        },
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $code + '/phase').val() !== 'closed' && (data.exists() || root.child('rooms/' + $code + '/phase').val() === 'lobby')",
+            ".validate": "newData.hasChildren(['nickname', 'connected'])",
+            "nickname": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20" },
+            "connected": { ".validate": "newData.isBoolean()" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
+    "rounds": {
+      "$code": {
+        ".read": "auth != null && root.child('rooms/' + $code + '/hostId').val() === auth.uid",
+        ".write": "auth != null && root.child('rooms/' + $code + '/hostId').val() === auth.uid",
+        "$round": {
+          "songs": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && $round === 'r' + root.child('rooms/' + $code + '/round').val() && root.child('rooms/' + $code + '/phase').val() === 'submission' && ($uid === root.child('rooms/' + $code + '/leftId').val() || $uid === root.child('rooms/' + $code + '/rightId').val()) && now <= root.child('rooms/' + $code + '/deadline').val() + 3000",
+              ".validate": "newData.hasChildren(['videoId', 'title', 'channel', 'thumbnailUrl'])",
+              "videoId": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{11}$/)" },
+              "title": { ".validate": "newData.isString() && newData.val().length <= 300" },
+              "channel": { ".validate": "newData.isString() && newData.val().length <= 300" },
+              "thumbnailUrl": { ".validate": "newData.isString() && newData.val().beginsWith('https://') && newData.val().length <= 500" },
+              "$other": { ".validate": false }
+            }
+          },
+          "votes": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && !data.exists() && $round === 'r' + root.child('rooms/' + $code + '/round').val() && root.child('rooms/' + $code + '/phase').val() === 'voting' && root.child('rooms/' + $code + '/voters/' + $uid).exists() && now <= root.child('rooms/' + $code + '/deadline').val() + 3000",
+              ".validate": "newData.isString() && (newData.val() === root.child('rooms/' + $code + '/leftId').val() || newData.val() === root.child('rooms/' + $code + '/rightId').val())"
+            }
+          },
+          "stops": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && $round === 'r' + root.child('rooms/' + $code + '/round').val() && ((root.child('rooms/' + $code + '/phase').val() === 'songA' && $uid === root.child('rooms/' + $code + '/leftId').val()) || (root.child('rooms/' + $code + '/phase').val() === 'songB' && $uid === root.child('rooms/' + $code + '/rightId').val()))",
+              ".validate": "newData.val() === true"
+            }
+          }
+        }
+      }
+    }
   }
 }

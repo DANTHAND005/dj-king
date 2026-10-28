@@ -93,6 +93,40 @@ void main() {
     },
   );
 
+  test(
+    'skips items that are not videos instead of failing the search',
+    () async {
+      final body = jsonEncode({
+        'items': [
+          {
+            'id': {'channelId': 'UC1'},
+            'snippet': {
+              'thumbnails': {
+                'medium': {'url': 'https://x.test/a.jpg'},
+              },
+            },
+          },
+          {
+            'id': {'videoId': 'dQw4w9WgXcQ'},
+            'snippet': {
+              'title': 't',
+              'channelTitle': 'c',
+              'thumbnails': {
+                'medium': {'url': 'https://x.test/a.jpg'},
+              },
+            },
+          },
+        ],
+      });
+      final service = YoutubeSearchService(
+        apiKey: 'test-key',
+        client: MockClient((_) async => http.Response(body, 200)),
+      );
+      addTearDown(service.close);
+      final songs = await service.search('artist');
+      expect(songs.map((s) => s.videoId), ['dQw4w9WgXcQ']);
+    },
+  );
   test('invalid API responses fail safely', () async {
     for (final body in ['not json', '{"items":[{}]}', '{"items":null}']) {
       final service = YoutubeSearchService(
