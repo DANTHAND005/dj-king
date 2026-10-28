@@ -132,7 +132,7 @@ class GameService {
   }
 
   // Test players, so one person can run a whole game. The host's phone plays for them.
-  // ponytail: remove once real friends are playing, or hide behind a debug flag.
+  // remove once real friends are playing, or hide behind a debug flag.
   static const _botNames = ['Ava', 'Ben', 'Cleo'];
   static const _botVideos = ['dQw4w9WgXcQ', 'jNQXAC9IHK8', 'M7lc1UVf-VE'];
   final _botDone = <String>{};

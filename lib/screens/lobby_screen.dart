@@ -49,7 +49,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       try {
         await widget.game.leaveRoom(room);
       } catch (_) {
-        // ponytail: leaving is best effort; the disconnect handler marks us offline anyway.
+        // leaving is best effort; the disconnect handler marks us offline anyway.
       }
     }
     if (!didPop && mounted) Navigator.of(context).pop();

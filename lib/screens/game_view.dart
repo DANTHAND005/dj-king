@@ -116,7 +116,7 @@ class _GameViewState extends State<GameView> {
         default:
       }
     } catch (_) {
-      // ponytail: "still open" and stale-revision errors are expected; the next tick retries.
+      // "still open" and stale-revision errors are expected; the next tick retries.
     } finally {
       _working = false;
     }
